@@ -28,9 +28,24 @@ static void draw_points(GContext *ctx) {
 static void handle_canvas_update_proc(Layer *this_layer, GContext *ctx) {
   // draw background
   graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, GRect(0,0,144,152), 0, GCornerNone);
+  graphics_fill_rect(ctx, GRect(0, 0, 144, 168), 0, GCornerNone);
   
   draw_points(ctx);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  
+  // Write the current hours and minutes into the buffer
+  if(clock_is_24h_style() == true) {
+    // Use 24 hour format
+    strftime(buffer, sizeof("000000"), "%H%M%S", tick_time);
+  } else {
+    // Use 12 hour format
+    strftime(buffer, sizeof("000000"), "%I%M%S", tick_time);
+  }
+  
+  // mark layer as dirty
+  layer_mark_dirty(s_canvas_layer);
 }
 
 static void handle_main_window_load(Window *window) {
@@ -47,40 +62,6 @@ static void handle_main_window_load(Window *window) {
 
 static void handle_main_window_unload(Window *window) {
   layer_destroy(s_canvas_layer);
-}
-
-static void update_time() {
-  // Get a tm structure
-  time_t temp = time(NULL); 
-  struct tm *tick_time = localtime(&temp);
-
-  // Write the current hours and minutes into the buffer
-  if(clock_is_24h_style() == true) {
-    // Use 24 hour format
-    strftime(buffer, sizeof("000000"), "%H%M%S", tick_time);
-  } else {
-    // Use 12 hour format
-    strftime(buffer, sizeof("000000"), "%I%M%S", tick_time);
-  }
-  
-  // Create main Window element and assign to pointer
-  Window *temp_window = window_create();
-  
-  // Set handlers to manage the elements inside the Window
-  window_set_window_handlers(temp_window, (WindowHandlers) {
-    .load = handle_main_window_load,
-    .unload = handle_main_window_unload,
-  });
-   
-  // Show the Window on the watch, with animated=false
-  window_stack_remove(s_my_window, false);
-  window_stack_push(temp_window, false);
-  
-  s_my_window = temp_window;
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
 }
 
 void handle_init(void) {
