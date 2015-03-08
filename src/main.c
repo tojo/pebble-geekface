@@ -3,9 +3,11 @@
 static Window *s_my_window;
 static Layer *s_canvas_layer;
 
-static int16_t rows[4] = {110,88,66,44};
-static int16_t columns[6] = {16,38,60,82,104,126};
-static int16_t points[6] = {2,4,3,4,3,4};
+const int16_t rows[4] = {110,88,66,44};
+const int16_t columns[6] = {16,38,60,82,104,126};
+const int16_t points[6] = {2,4,3,4,3,4};
+const int BIT_MASK[4] = {0x1, 0x2, 0x4, 0x8};
+
 static char buffer[] = "000000";
 
 static void fill_circle(GContext *ctx, GPoint p, GColor color, int size) {
@@ -18,7 +20,7 @@ static void draw_points(GContext *ctx) {
     for(int r = 0; r < points[c]; r++) {
       fill_circle(ctx, GPoint(columns[c], rows[r]), GColorWhite, 8);
       fill_circle(ctx, GPoint(columns[c], rows[r]), GColorBlack, 7);
-      if (buffer[5] == '1') {
+      if ((buffer[c] - '0') & BIT_MASK[r]) {
         fill_circle(ctx, GPoint(columns[c], rows[r]), GColorWhite, 5);
       }
     }
